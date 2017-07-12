@@ -78,18 +78,19 @@ class TestAPI(unittest.TestCase):
         self.assertEqual(data["message"], "Deleted song id1")
         
     def test_edit_song(self):
-        pass
-        """
+
         #create and add a song to edit
         file1 = models.File(name="editme.mp3")
         song1 = models.Song(file=file1)
-        file2 = models.File(name="editme_2.mp3")
-        song2 = models.Song(file=file2)
-        session.add_all([file1, song1, file2, song2])
+        #file2 = models.File(name="editme_2.mp3")
+        #song2 = models.Song(file=file2)
+        session.add_all([file1, song1])
         session.commit()
+        #check id
+        print(session.query(models.Song).all()[0].id)
         
         data = {"name": "edited.mp3"}
-        
+        #headers- sending data that works in predefined format
         response = self.client.put("/api/songs/1/edit", data=json.dumps(data),
                                     content_type="application/json", 
                                     headers=[("Accept", "application/json")])
@@ -100,7 +101,8 @@ class TestAPI(unittest.TestCase):
         
         data = json.loads(response.data.decode("ascii"))
         self.assertEqual(data["file"]["name"], "edited.mp3")
-        """
+
+
     def test_get_uploaded_file(self):
         path = upload_path("test.txt")
         with open(path, "wb") as f:
@@ -116,18 +118,19 @@ class TestAPI(unittest.TestCase):
         data = {
             "file": (BytesIO(b"File contents"), "test.txt")
         }
-        
-        response = self.client.post("/api/files", data=data,
-                                    content_type="multipart/form-data",
-                                    headers=[("Accept", "application/json")]
-                                    )
-                                    
+
+        response = self.client.post("/api/files",
+            data=data,
+            content_type="multipart/form-data",
+            headers=[("Accept", "application/json")]
+        )
+
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.mimetype, "application/json")
-        
-        data= json.loads(response.data.decode("ascii"))
+
+        data = json.loads(response.data.decode("ascii"))
         self.assertEqual(urlparse(data["path"]).path, "/uploads/test.txt")
-        
+
         path = upload_path("test.txt")
         self.assertTrue(os.path.isfile(path))
         with open(path, "rb") as f:

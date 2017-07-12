@@ -69,10 +69,11 @@ def song_delete(id):
     data = json.dumps({"message":message})
     return Response(data, 200, mimetype="application/json")
 
-@app.route("/api/songs/<int:id>/edit")
+@app.route("/api/songs/<int:id>/edit", methods=["GET", "PUT"])
 @decorators.accept("application/json")
 def song_edit(id):
     """"Edit a song"""
+    print("song_edit running")
     data = request.json
     
     #check that json data supplied is valid
@@ -90,9 +91,9 @@ def song_edit(id):
     file.name = data["name"]
     session.commit()
     
-    #data = json.dumps(song.as_dictionary())
-    #headers = {"Location": url_for("songs_get")}
-    return Response(data, 201, headers=headers, mimetype="application/json")
+    data = json.dumps(song.as_dictionary())
+    
+    return Response(data, 201, mimetype="application/json")
 
 @app.route("/uploads/<filename>", methods=["GET"])
 def uploaded_file(filename):
@@ -108,7 +109,7 @@ def file_post():
         return Response(json.dumps(data), 422, mimetype="application/json")
 
     filename = secure_filename(file.filename)
-    db_file = models.File(filename=filename)
+    db_file = models.File(name=filename)
     session.add(db_file)
     session.commit()
     file.save(upload_path(filename))
